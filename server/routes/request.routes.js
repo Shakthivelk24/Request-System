@@ -1,21 +1,20 @@
 import express from "express";
-import Request from "../models/request.model.js";
-import User from "../models/user.model.js";
-import { authMiddleware } from "../middleware/auth.js";
+
 import { getReceivedRequests, getSentRequests, sendRequest, updateRequestStatus } from "../controllers/request.controller.js";
+import isAuth from "../middleware/auth.js";
 
 const router = express.Router();
 
 // Send a request
-router.post("/send", authMiddleware, sendRequest);
+router.post("/send", isAuth, sendRequest);
 
 // Get all requests received by logged-in user
-router.get("/received", authMiddleware, getReceivedRequests);
+router.get("/received", isAuth, getReceivedRequests);
 
 // Get all requests sent by logged-in user
-router.get("/sent", authMiddleware, getSentRequests);
+router.get("/sent", isAuth, getSentRequests);
 
 // Update request status (accept/reject/cancel)
-router.put("/status/:requestId", authMiddleware, updateRequestStatus);
+router.put("/status/:requestId", isAuth, updateRequestStatus);
 
 export default router;
