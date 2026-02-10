@@ -1,10 +1,10 @@
-import Request from "../models/request.model";
-import User from "../models/user.model";
+import Request from "../models/request.model.js";
+import User from "../models/user.model.js";
 
 export const sendRequest = async (req, res) => {
   try {
     const { receiverId, message } = req.body;
-    const senderId = req.user.userId;
+    const senderId = req.userId;
 
     const receiver = await User.findById(receiverId);
     if (!receiver) {
@@ -21,12 +21,13 @@ export const sendRequest = async (req, res) => {
     res.json({ success: true, request: newRequest });
   } catch (err) {
     res.status(500).json({ error: err.message });
+    console.error("Send request error:", err.message);
   }
 };
 
 export const getReceivedRequests = async (req, res) => {
   try {
-    const requests = await Request.find({ receiver: req.user.userId })
+    const requests = await Request.find({ receiver: req.userId })
       .populate("sender", "username email")
       .sort({ createdAt: -1 });
 
@@ -38,7 +39,7 @@ export const getReceivedRequests = async (req, res) => {
 
 export const getSentRequests = async (req, res) => {
   try {
-    const requests = await Request.find({ sender: req.user.userId })
+    const requests = await Request.find({ sender: req.userId })
       .populate("receiver", "username email")
       .sort({ createdAt: -1 });
 
@@ -61,8 +62,8 @@ export const updateRequestStatus = async (req, res) => {
       {
         _id: req.params.requestId,
         $or: [
-          { receiver: req.user.userId },
-          { sender: req.user.userId }
+          { receiver: req.userId },
+          { sender: req.userId }
         ]
       },
       { status },
@@ -76,5 +77,6 @@ export const updateRequestStatus = async (req, res) => {
     res.json({ message: "Status updated successfully", request: updated });
   } catch (err) {
     res.status(500).json({ error: err.message });
+    console.error("Update request status error:", err.message);
   }
 }
