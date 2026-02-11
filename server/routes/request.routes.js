@@ -1,10 +1,11 @@
 import express from "express";
 
-import { getReceivedRequests, getSentRequests, sendRequest, updateRequestStatus } from "../controllers/request.controller.js";
+import { getCurrentUser, getReceivedRequests, getSentRequests, sendRequest, updateRequestStatus } from "../controllers/request.controller.js";
 import isAuth from "../middleware/auth.js";
 
 const router = express.Router();
 
+router.get("/current", isAuth, getCurrentUser); // Get current authenticated user details 
 // Send a request
 router.post("/send", isAuth, sendRequest);
 
