@@ -6,13 +6,16 @@ import "dotenv/config.js";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
 
-
-connectDB()
+connectDB();
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors());
-
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
 
 // Routes
 app.use("/api/users", userRoutes);
@@ -20,4 +23,6 @@ app.use("/api/requests", requestRoutes);
 
 // Start server
 const port = process.env.PORT;
-app.listen(port, () => console.log(`Server is running in http://localhost:${port}`));
+app.listen(port, () =>
+  console.log(`Server is running in http://localhost:${port}`),
+);
