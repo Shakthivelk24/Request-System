@@ -17,25 +17,46 @@ export const getCurrentUser = async (req, res) => {
 
 export const sendRequest = async (req, res) => {
   try {
-    const { receiverId, message } = req.body;
+    const { receiverEmail, message } = req.body;
     const senderId = req.userId;
 
-    const receiver = await User.findById(receiverId);
+    // Find receiver using email
+    const receiver = await User.findOne({ email: receiverEmail });
+
     if (!receiver) {
-      return res.status(404).json({ error: "Receiver not found" });
+      return res.status(404).json({
+        success: false,
+        error: "Receiver not found",
+      });
     }
+
+    // Optional: Prevent sending request to yourself
+    if (receiver._id.toString() === senderId.toString()) {
+      return res.status(400).json({
+        success: false,
+        error: "You cannot send a request to yourself",
+      });
+    }
+
     const newRequest = new Request({
       sender: senderId,
-      receiver: receiverId,
+      receiver: receiver._id,
       message,
     });
 
     await newRequest.save();
 
-    res.json({ success: true, request: newRequest });
+    res.status(201).json({
+      success: true,
+      request: newRequest,
+    });
+
   } catch (err) {
-    res.status(500).json({ error: err.message });
-    console.error("Send request error:", err.message);
+    console.error("Send request error:", err);
+    res.status(500).json({
+      success: false,
+      error: err.message,
+    });
   }
 };
 
