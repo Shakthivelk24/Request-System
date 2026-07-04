@@ -1,0 +1,104 @@
+# ============================================================
+# Network Policies
+# ============================================================
+# Restricts pod-to-pod communication.
+#
+# Requires:
+# - A Kubernetes CNI plugin that supports NetworkPolicy
+#   (Calico, Cilium, etc.)
+#
+# Docker Desktop's built-in Kubernetes may not enforce
+# NetworkPolicies. They are fully supported on clusters
+# with a compatible CNI such as AKS with Azure CNI + Calico.
+# ============================================================
+
+# ============================================================
+# Backend Network Policy
+# Only frontend pods may access the backend on port 5000.
+# ============================================================
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: backend-network-policy
+  namespace: request-system
+
+spec:
+  podSelector:
+    matchLabels:
+      app: backend
+
+  policyTypes:
+    - Ingress
+
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: frontend
+
+      ports:
+        - protocol: TCP
+          port: 5000
+
+---
+
+# ============================================================
+# Frontend Network Policy
+# Allows HTTP traffic to frontend Pods.
+# ============================================================
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: frontend-network-policy
+  namespace: request-system
+
+spec:
+  podSelector:
+    matchLabels:
+      app: frontend
+
+  policyTypes:
+    - Ingress
+
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 80
+
+---
+
+# ============================================================
+# Allow DNS
+# Pods must be able to resolve service names such as
+# backend-service.
+# ============================================================
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: allow-dns
+  namespace: request-system
+
+spec:
+  podSelector: {}
+
+  policyTypes:
+    - Egress
+
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+
+      ports:
+        - protocol: UDP
+          port: 53
+
+        - protocol: TCP
+          port: 53
