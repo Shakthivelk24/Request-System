@@ -1,0 +1,49 @@
+# ============================================================
+# ConfigMap
+# ============================================================
+# Stores non-sensitive configuration values.
+# These values can be updated without rebuilding Docker images.
+#
+# Sensitive information such as passwords, API keys,
+# JWT secrets and MongoDB connection strings should
+# NEVER be stored here.
+# ============================================================
+
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: request-system-config
+  namespace: request-system
+
+  labels:
+    app: request-system
+    component: configuration
+
+data:
+
+  # ==========================================================
+  # Application Configuration
+  # ==========================================================
+
+  NODE_ENV: "production"
+
+  PORT: "5000"
+
+  # ==========================================================
+  # Frontend Configuration
+  # ==========================================================
+
+  FRONTEND_URL: "http://localhost"
+
+  # ==========================================================
+  # Logging
+  # ==========================================================
+
+  LOG_LEVEL: "info"
+
+  # ==========================================================
+  # Health Check Endpoint
+  # ==========================================================
+
+  HEALTH_CHECK_PATH: "/api/health"
