@@ -57,7 +57,7 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # Add labels for image metadata and traceability
 LABEL maintainer="devops-team"
 LABEL version="1.0"
-LABEL description="DevOps Pipeline Dashboard - Frontend"
+LABEL description="Request System - Frontend"
 
 # Document that Nginx serves on port 80
 # This is metadata only - port mapping happens in docker-compose/kubernetes
