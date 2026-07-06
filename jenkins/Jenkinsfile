@@ -268,8 +268,8 @@ pipeline {
                         customLog('Pushing frontend Docker image...')
 
                         dockerPush(
-                          imageName: FRONTEND_IMAGE,
-                          imageVersion: IMAGE_TAG
+                           FRONTEND_IMAGE,
+                           IMAGE_TAG
                         )
                     }
                 }
@@ -279,8 +279,8 @@ pipeline {
                         customLog('Pushing backend Docker image...')
 
                         dockerPush(
-                          imageName: BACKEND_IMAGE,
-                          imageVersion: IMAGE_TAG
+                           BACKEND_IMAGE,
+                           IMAGE_TAG
                         )
                     }
                 }
