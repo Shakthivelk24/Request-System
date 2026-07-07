@@ -25,8 +25,7 @@ pipeline {
 
         // // Reports
         TRIVY_REPORT_DIR = 'reports/trivy'
-        ZAP_REPORT_DIR = 'reports/zap'
-
+        
         // Application URL (after deployment)
         APP_URL = 'http://localhost'
     }
@@ -325,7 +324,7 @@ pipeline {
                     steps {
                         zapScan(
                           targetUrl: APP_URL,
-                          reportDir: ZAP_REPORT_DIR,
+                          reportDir: 'reports/owasp-zap',
                           reportName: 'frontend-scan',
                           dockerNetwork: 'bridge'
                        )
@@ -336,7 +335,7 @@ pipeline {
                     steps {
                         zapScan(
                            targetUrl: "${APP_URL}/api",
-                           reportDir: ZAP_REPORT_DIR,
+                           reportDir: 'reports/owasp-zap',
                            reportName: 'backend-api-scan',
                            dockerNetwork: 'bridge'
                         )
