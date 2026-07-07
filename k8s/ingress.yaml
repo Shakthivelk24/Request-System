@@ -5,17 +5,17 @@
 #
 # Traffic Flow:
 #
-# Browser
-#     │
-#     ▼
-# NGINX Ingress Controller
-#     │
-# ┌───┴───────────────┐
-# │                   │
-# ▼                   ▼
-# /                  /api
-# │                   │
-# ▼                   ▼
+# Browser / Postman / ZAP / ngrok
+#               │
+#               ▼
+#      NGINX Ingress Controller
+#               │
+#      ┌────────┴────────┐
+#      │                 │
+#      ▼                 ▼
+#     /                 /api
+#      │                 │
+#      ▼                 ▼
 # Frontend Service   Backend Service
 #
 # ============================================================
@@ -35,7 +35,7 @@ metadata:
 
     # Enable CORS
     nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "http://localhost"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
 
     # Maximum upload size
     nginx.ingress.kubernetes.io/proxy-body-size: "10m"
@@ -47,13 +47,12 @@ spec:
   ingressClassName: nginx
 
   rules:
-    - host: localhost
-      http:
+    - http:
         paths:
 
-          # ==========================================
+          # ==================================================
           # Backend API
-          # ==========================================
+          # ==================================================
           - path: /api
             pathType: Prefix
             backend:
@@ -62,9 +61,9 @@ spec:
                 port:
                   number: 5000
 
-          # ==========================================
+          # ==================================================
           # Frontend
-          # ==========================================
+          # ==================================================
           - path: /
             pathType: Prefix
             backend:
