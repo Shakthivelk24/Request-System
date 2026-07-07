@@ -334,7 +334,7 @@ pipeline {
                 stage('Backend API Scan') {
                     steps {
                         zapScan(
-                           targetUrl: "${APP_URL}/api",
+                           targetUrl: "${APP_URL}/api/health",
                            reportDir: 'reports/owasp-zap',
                            reportName: 'backend-api-scan',
                            dockerNetwork: 'bridge'
