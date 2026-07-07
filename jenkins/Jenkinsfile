@@ -286,5 +286,197 @@ pipeline {
                 }
             }
         }
+        // ====================================================
+        // STAGE 13: DEPLOY TO KUBERNETES
+        // Deploy the application to Kubernetes cluster
+        // ====================================================
+        // ====================================================
+        // STAGE 13: DEPLOY TO KUBERNETES
+        // ====================================================
+        stage('🚀 Deploy to Kubernetes') {
+            steps {
+                customLog('Deploying application to Kubernetes...')
+
+                kubernetesDeploy(
+                 namespace: K8S_NAMESPACE,
+                 frontendImage: FRONTEND_IMAGE,
+                 backendImage: BACKEND_IMAGE,
+                 imageTag: IMAGE_TAG
+             )
+            }
+        }
+        // ====================================================
+        // STAGE 14: VERIFY DEPLOYMENT
+        // Verify Kubernetes Deployment
+        // ====================================================
+        stage('✔️ Verify Deployment') {
+            steps {
+                customLog('Verifying Kubernetes deployment...')
+                verifyDeployment(K8S_NAMESPACE)
+            }
+        }
+        // ====================================================
+        // STAGE 15: OWASP ZAP DAST SCAN
+        // Perform Dynamic Application Security Testing (DAST) using OWASP ZAP
+        // ====================================================
+        stage('🔐 OWASP ZAP DAST Scan') {
+            parallel {
+                stage('Frontend Scan') {
+                    steps {
+                        zapScan(
+                          targetUrl: APP_URL,
+                          reportDir: ZAP_REPORT_DIR,
+                          reportName: 'frontend-scan',
+                          dockerNetwork: 'bridge'
+                       )
+                    }
+                }
+
+                stage('Backend API Scan') {
+                    steps {
+                        zapScan(
+                           targetUrl: "${APP_URL}/api",
+                           reportDir: ZAP_REPORT_DIR,
+                           reportName: 'backend-api-scan',
+                           dockerNetwork: 'bridge'
+                        )
+                    }
+                }
+            }
+        }
+        // ====================================================
+        // STAGE 16: ARCHIVE REPORTS
+        // ====================================================
+        stage('📊 Archive Reports') {
+            steps {
+                customLog('Archiving reports...')
+                archiveReports()
+            }
+        }
+    }
+    post {
+        // ====================================================
+        // Build Successful
+        // ====================================================
+        success {
+            customLog("Pipeline SUCCEEDED — Build ${BUILD_NUMBER}")
+
+            emailext(
+            subject: "✅ SUCCESS | ${JOB_NAME} #${BUILD_NUMBER}",
+            mimeType: 'text/html',
+            to: 'shakthivelk1124@gmail.com',
+            body: """
+                <h2 style="color:green;">Pipeline Succeeded</h2>
+
+                <p><b>Job:</b> ${JOB_NAME}</p>
+                <p><b>Build:</b> #${BUILD_NUMBER}</p>
+
+                <hr>
+
+                <h3>Application</h3>
+                <ul>
+                    <li>Frontend: http://localhost</li>
+                    <li>Prometheus: http://localhost:9090</li>
+                    <li>Grafana: http://localhost:3000</li>
+                </ul>
+
+                <p>
+                    <a href="${BUILD_URL}">
+                        View Build Details
+                    </a>
+                </p>
+            """
+        )
+        }
+
+        // ====================================================
+        // Build Failed
+        // ====================================================
+        failure {
+            customLog("Pipeline FAILED — Build ${BUILD_NUMBER}")
+
+            emailext(
+            subject: "❌ FAILED | ${JOB_NAME} #${BUILD_NUMBER}",
+            mimeType: 'text/html',
+            to: 'shakthivelk1124@gmail.com',
+            body: """
+                <h2 style="color:red;">Pipeline Failed</h2>
+
+                <p><b>Job:</b> ${JOB_NAME}</p>
+                <p><b>Build:</b> #${BUILD_NUMBER}</p>
+
+                <p>
+                    Please check the Jenkins console output.
+                </p>
+
+                <p>
+                    <a href="${BUILD_URL}">
+                        View Build Logs
+                    </a>
+                </p>
+            """
+        )
+        }
+
+        // ====================================================
+        // Build Unstable
+        // ====================================================
+        unstable {
+            customLog('Pipeline is UNSTABLE.')
+
+            emailext(
+            subject: "⚠️ UNSTABLE | ${JOB_NAME} #${BUILD_NUMBER}",
+            mimeType: 'text/html',
+            to: 'shakthivelk1124@gmail.com',
+            body: """
+                <h2 style="color:orange;">Pipeline Unstable</h2>
+
+                <p><b>Job:</b> ${JOB_NAME}</p>
+                <p><b>Build:</b> #${BUILD_NUMBER}</p>
+
+                <p>
+                    Some quality checks failed.
+                </p>
+
+                <p>
+                    <a href="${BUILD_URL}">
+                        View Build
+                    </a>
+                </p>
+            """
+        )
+        }
+
+        // ====================================================
+        // Always Execute
+        // ====================================================
+        always {
+            customLog('Pipeline completed.')
+
+            echo "Build Number : ${BUILD_NUMBER}"
+            echo "Result       : ${currentBuild.currentResult}"
+            echo "Duration     : ${currentBuild.durationString}"
+
+            script {
+                if (isUnix()) {
+                    sh """
+                    docker rmi ${FRONTEND_IMAGE}:${IMAGE_TAG} || true
+                    docker rmi ${BACKEND_IMAGE}:${IMAGE_TAG} || true
+
+                    docker system prune -f --filter "until=24h" || true
+                """
+            } else {
+                    bat """
+                    docker rmi ${FRONTEND_IMAGE}:${IMAGE_TAG}
+
+                    docker rmi ${BACKEND_IMAGE}:${IMAGE_TAG}
+
+                    docker system prune -f
+                """
+                }
+            }
+
+            cleanWs()
+        }
     }
 }
