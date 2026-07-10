@@ -31,6 +31,7 @@ services:
       - prometheus
 
     volumes:
+      - grafana-storage:/var/lib/grafana
       # Datasource provisioning
       - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
 
@@ -43,6 +44,18 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
+            # ==========================
+      # SMTP Configuration
+      # ==========================
+      GF_SMTP_ENABLED: "true"
+      GF_SMTP_HOST: smtp.gmail.com:587
+      GF_SMTP_USER: shakthivelk1124@gmail.com
+      GF_SMTP_PASSWORD: kiabzkhffhvwdusy
+      GF_SMTP_FROM_ADDRESS: shakthivelk1124@gmail.com
+      GF_SMTP_FROM_NAME: Grafana
+      GF_SMTP_SKIP_VERIFY: "true"
 
     extra_hosts:
       - "host.docker.internal:host-gateway"
+volumes:
+  grafana-storage:
