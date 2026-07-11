@@ -22,7 +22,7 @@ metadata:
 
 spec:
   # Internal Kubernetes service
-  type: NodePort
+  type: ClusterIP
 
   # Select all backend pods
   selector:
@@ -37,5 +37,3 @@ spec:
 
       # Container Port
       targetPort: 5000
-
-      nodePort: 30050
