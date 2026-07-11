@@ -1,2 +1,6 @@
 .env
-node_modules
+node_modules/
+
+docker-compose.monitoring.yml
+
+k8s/monitoring/grafana/secret.yaml
