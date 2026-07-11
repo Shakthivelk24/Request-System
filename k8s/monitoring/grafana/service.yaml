@@ -1,0 +1,42 @@
+# ============================================================
+# Grafana Service
+# ============================================================
+# Exposes Grafana inside the Kubernetes cluster.
+#
+# Service Type:
+# - ClusterIP
+#
+# Why ClusterIP?
+# - Grafana is accessed through an Ingress.
+# - Prevents direct external access.
+# - Production-ready architecture.
+#
+# Access:
+# http://grafana-service:3000
+# ============================================================
+
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: grafana-service
+  namespace: request-system
+
+  labels:
+    app: grafana
+
+spec:
+  type: ClusterIP
+
+  selector:
+    app: grafana
+
+  ports:
+    - name: http
+      protocol: TCP
+
+      # Service Port
+      port: 3000
+
+      # Grafana Container Port
+      targetPort: 3000

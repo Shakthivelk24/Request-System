@@ -1,0 +1,35 @@
+# ============================================================
+# Grafana Persistent Volume Claim
+# ============================================================
+# Stores Grafana data permanently.
+#
+# Data Stored:
+# - Dashboards
+# - Users
+# - Alert Rules
+# - Contact Points
+# - Notification Policies
+# - Plugins
+#
+# Storage:
+# - Docker Desktop Kubernetes -> hostpath
+# - Azure AKS -> Azure Managed Disk
+# ============================================================
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+
+metadata:
+  name: grafana-pvc
+  namespace: request-system
+
+  labels:
+    app: grafana
+
+spec:
+  accessModes:
+    - ReadWriteOnce
+
+  resources:
+    requests:
+      storage: 5Gi
