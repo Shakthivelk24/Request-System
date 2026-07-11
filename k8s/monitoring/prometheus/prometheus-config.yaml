@@ -1,0 +1,50 @@
+# ============================================================
+# Prometheus Configuration
+# ============================================================
+# This ConfigMap contains the Prometheus configuration.
+#
+# Jobs:
+# 1. request-system-backend
+#    - Scrapes custom metrics exposed by the backend
+#      (/metrics endpoint)
+#
+# 2. prometheus
+#    - Scrapes Prometheus' own metrics
+#
+# ============================================================
+
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: prometheus-config
+  namespace: request-system
+
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      scrape_timeout: 10s
+      evaluation_interval: 15s
+
+    scrape_configs:
+
+      # =====================================================
+      # Backend Metrics
+      # =====================================================
+      - job_name: "request-system-backend"
+
+        metrics_path: /metrics
+
+        static_configs:
+          - targets:
+              - backend-service.request-system.svc.cluster.local:5000
+
+      # =====================================================
+      # Prometheus Self Monitoring
+      # =====================================================
+      - job_name: "prometheus"
+
+        static_configs:
+          - targets:
+              - localhost:9090

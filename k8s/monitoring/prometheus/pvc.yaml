@@ -1,0 +1,29 @@
+# ============================================================
+# Prometheus Persistent Volume Claim
+# ============================================================
+# Stores Prometheus TSDB data.
+#
+# Benefits:
+# - Metrics are preserved if the Prometheus Pod restarts.
+# - Dynamic provisioning:
+#     • Docker Desktop -> hostpath
+#     • Azure AKS -> Azure Managed Disk
+# ============================================================
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+
+metadata:
+  name: prometheus-pvc
+  namespace: request-system
+
+  labels:
+    app: prometheus
+
+spec:
+  accessModes:
+    - ReadWriteOnce
+
+  resources:
+    requests:
+      storage: 5Gi

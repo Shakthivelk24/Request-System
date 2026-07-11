@@ -1,0 +1,86 @@
+# ============================================================
+# Prometheus Deployment
+# ============================================================
+# Deploys Prometheus inside the monitoring namespace.
+#
+# Responsibilities:
+# - Scrape backend metrics
+# - Store metrics
+# - Serve Prometheus UI
+#
+# Configuration:
+# - Uses ConfigMap for prometheus.yml
+# - Uses Persistent Volume for metric storage
+# ============================================================
+
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: prometheus
+  namespace: request-system
+
+  labels:
+    app: prometheus
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: prometheus
+
+  template:
+    metadata:
+      labels:
+        app: prometheus
+
+    spec:
+      containers:
+
+        - name: prometheus
+
+          image: prom/prometheus:latest
+
+          imagePullPolicy: IfNotPresent
+
+          args:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+            - "--storage.tsdb.path=/prometheus"
+            - "--storage.tsdb.retention.time=15d"
+            - "--web.external-url=http://localhost/prometheus"
+            - "--web.route-prefix=/"
+
+          ports:
+            - containerPort: 9090
+
+          volumeMounts:
+
+            # Prometheus Configuration
+            - name: prometheus-config
+              mountPath: /etc/prometheus
+
+            # Metrics Storage
+            - name: prometheus-storage
+              mountPath: /prometheus
+
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+      volumes:
+
+        # ConfigMap
+        - name: prometheus-config
+          configMap:
+            name: prometheus-config
+
+        # Persistent Storage
+        - name: prometheus-storage
+          persistentVolumeClaim:
+            claimName: prometheus-pvc
