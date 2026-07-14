@@ -1,3 +1,5 @@
+# This .dockerignore file is used to specify files and directories that should be excluded from the Docker build context. This helps to reduce the size of the build context and improve build performance.
+
 # ============================================================
 # Node.js
 # ============================================================
