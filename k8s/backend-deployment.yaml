@@ -65,18 +65,18 @@ spec:
         - name: backend
 
           image: shakthivelk24/requestsystem-backend:latest
-
           imagePullPolicy: Always
 
           ports:
             - containerPort: 5000
 
+          # ==================================================
+          # Environment Variables
+          # ==================================================
+
           env:
 
-            # ==========================================
             # ConfigMap
-            # ==========================================
-
             - name: NODE_ENV
               valueFrom:
                 configMapKeyRef:
@@ -101,10 +101,7 @@ spec:
                   name: request-system-config
                   key: LOG_LEVEL
 
-            # ==========================================
             # Secrets
-            # ==========================================
-
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
@@ -117,8 +114,11 @@ spec:
                   name: request-system-secret
                   key: MONGODB_URL
 
-          resources:
+          # ==================================================
+          # Resources
+          # ==================================================
 
+          resources:
             requests:
               cpu: "100m"
               memory: "128Mi"
@@ -127,15 +127,27 @@ spec:
               cpu: "300m"
               memory: "256Mi"
 
-          livenessProbe:
+          # ==================================================
+          # Startup Probe
+          # Gives MongoDB enough time to connect
+          # ==================================================
+
+          startupProbe:
             httpGet:
               path: /api/health
               port: 5000
 
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 3
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+
+            # 60 × 5 = 300 seconds (5 minutes)
+            failureThreshold: 60
+
+          # ==================================================
+          # Readiness Probe
+          # Determines when the pod can receive traffic
+          # ==================================================
 
           readinessProbe:
             httpGet:
@@ -147,13 +159,24 @@ spec:
             timeoutSeconds: 3
             failureThreshold: 3
 
-          startupProbe:
+          # ==================================================
+          # Liveness Probe
+          # Restarts container if it becomes unhealthy
+          # ==================================================
+
+          livenessProbe:
             httpGet:
               path: /api/health
               port: 5000
 
-            failureThreshold: 30
-            periodSeconds: 5
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          # ==================================================
+          # Security Context
+          # ==================================================
 
           securityContext:
             allowPrivilegeEscalation: false
