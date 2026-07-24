@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+// MongoDB connection function with retry logic
 const connectDB = async () => {
   while (true) {
     try {
