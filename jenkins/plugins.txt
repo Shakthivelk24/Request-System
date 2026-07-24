@@ -1,3 +1,4 @@
+Required Plugins for the implementation of the DevSecOps 
 Git
 GitHub
 Pipeline
